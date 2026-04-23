@@ -479,8 +479,8 @@ async function saveResultImage(char) {
 
     // ใน IG/LINE/FB in-app WebView → ข้าม share API ไปโชว์ modal
     if (isInApp) {
-      if (blobUrl) showImagePreview(blobUrl);
-      else showImagePreview(canvas.toDataURL("image/png"));
+      const previewUrl = blobUrl || canvas.toDataURL("image/png");
+      showImagePreview(previewUrl, char);
       handled = true;
     }
 
@@ -588,7 +588,9 @@ async function urlToPngDataUrl(url) {
 }
 
 /* Modal โชว์ภาพให้กดค้างบันทึก (สำหรับ LINE/IG WebView ที่บล็อก download) */
-function showImagePreview(dataUrl) {
+let _previewChar = null;
+function showImagePreview(dataUrl, char) {
+  _previewChar = char || _previewChar;
   let modal = document.getElementById("imgPreviewModal");
   if (!modal) {
     modal = document.createElement("div");
@@ -598,7 +600,7 @@ function showImagePreview(dataUrl) {
       <div class="img-preview-box">
         <p class="img-preview-hint">กดค้างที่ภาพ แล้วเลือก <b>"บันทึกภาพ"</b></p>
         <img class="img-preview-img" alt="ผลลัพธ์"/>
-        <p class="img-preview-sub">ถ้าบันทึกไม่ได้ ให้แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์</p>
+        <p class="img-preview-sub">ถ้าบันทึกไม่ได้ ให้แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์ (ไม่ต้องทำแบบทดสอบใหม่ เว็บจะพาไปหน้าผลลัพธ์โดยตรง)</p>
         <button class="img-preview-external">เปิดในเบราว์เซอร์</button>
         <button class="img-preview-close">ปิด</button>
       </div>`;
@@ -606,20 +608,21 @@ function showImagePreview(dataUrl) {
     modal.querySelector(".img-preview-close").onclick = () => modal.classList.remove("show");
     modal.querySelector(".img-preview-backdrop").onclick = () => modal.classList.remove("show");
     modal.querySelector(".img-preview-external").onclick = () => {
-      // พยายามเปิดใน external browser
-      const url = location.href;
+      // แนบ ?result=<slug> เพื่อให้ browser ใหม่ข้ามไปหน้า result ทันที ไม่ต้องทำใหม่
+      const slug = _previewChar && _previewChar.slug;
+      const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+      const url = slug ? `${base}?result=${slug}` : location.href;
+
       const ua = navigator.userAgent || "";
       if (/Android/i.test(ua)) {
-        // Chrome intent บน Android
         location.href = "intent://" + url.replace(/^https?:\/\//, "") +
           "#Intent;scheme=https;package=com.android.chrome;end";
       } else {
-        // iOS: copy link + แจ้งให้ paste ใน Safari
         try {
           navigator.clipboard.writeText(url);
-          alert("คัดลอกลิงก์แล้ว\nกรุณาเปิด Safari แล้ววาง (paste) เพื่อเปิดอีกครั้ง");
+          alert("คัดลอกลิงก์แล้ว\nเปิด Safari แล้ววาง (paste) เพื่อไปหน้าผลลัพธ์ได้เลย ไม่ต้องทำใหม่");
         } catch (e) {
-          alert("กรุณาก็อปลิงก์นี้ไปเปิดใน Safari:\n" + url);
+          alert("ก็อปลิงก์นี้ไปเปิดใน Safari:\n" + url);
         }
       }
     };
