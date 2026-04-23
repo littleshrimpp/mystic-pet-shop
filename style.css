@@ -212,17 +212,25 @@ body.chat-mode {
    SCENE 2: CHAT
    ============================================ */
 .chat-container {
-  overflow: hidden;
   width: 100%;
   max-width: 520px;
   background: var(--bg-soft);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 80vh;
   max-height: 680px;
+  overflow: hidden;
+}
+
+/* scroll wrapper ครอบทั้ง messages + choices */
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-header {
@@ -245,9 +253,8 @@ body.chat-mode {
 }
 
 .chat-messages {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+  margin-top: auto;   /* ดันเนื้อหาลงล่างสุด จนกว่าจะล้น */
+  padding: 20px 20px 8px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -282,8 +289,7 @@ body.chat-mode {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 16px 16px;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  padding: 8px 16px 16px;
 }
 .choice-btn {
   padding: 12px 16px;

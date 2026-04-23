@@ -30,11 +30,13 @@
         <img class="npc-avatar" src="assets/characters/shopkeeper.webp" alt="เจ้าของร้าน"/>
         <span class="npc-name">เจ้าของร้าน</span>
       </div>
-      <div class="chat-messages" id="chatMessages">
-        <!-- messages injected by JS -->
-      </div>
-      <div class="chat-choices" id="chatChoices">
-        <!-- choice buttons injected by JS -->
+      <div class="chat-scroll" id="chatScroll">
+        <div class="chat-messages" id="chatMessages">
+          <!-- messages injected by JS -->
+        </div>
+        <div class="chat-choices" id="chatChoices">
+          <!-- choice buttons injected by JS -->
+        </div>
       </div>
     </div>
   </section>
@@ -89,7 +91,7 @@
       <p class="result-description" id="resultDescription" style="display:none"></p>
 
       <div class="result-actions">
-        <button class="btn-share" id="btnShare">📋 แชร์ให้เพื่อน</button>
+        <button class="btn-share" id="btnShare">📸 บันทึกภาพ</button>
         <button class="btn-restart" onclick="location.reload()">ทำอีกครั้ง</button>
       </div>
     </div>
@@ -98,6 +100,7 @@
   <!-- ===== WHITE FLASH OVERLAY ===== -->
   <div class="flash" id="flash"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>

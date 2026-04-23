@@ -140,7 +140,8 @@ function addNpcMessage(text) {
   // รองรับ markdown เบาๆ: *text* = italic
   div.innerHTML = text.replace(/\*(.+?)\*/g, "<i>$1</i>");
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  const scroller = document.getElementById("chatScroll") || container;
+  scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
 }
 
 function addUserMessage(text) {
@@ -149,7 +150,8 @@ function addUserMessage(text) {
   div.className = "msg user";
   div.textContent = text;
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  const scroller = document.getElementById("chatScroll") || container;
+  scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
 }
 
 function addTypingIndicator() {
@@ -159,7 +161,8 @@ function addTypingIndicator() {
   div.id = "typingIndicator";
   div.innerHTML = "<span></span><span></span><span></span>";
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  const scroller = document.getElementById("chatScroll") || container;
+  scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
 }
 
 function removeTypingIndicator() {
@@ -177,6 +180,9 @@ function renderChoices(choices, onSelect) {
     btn.addEventListener("click", () => onSelect(c, i));
     container.appendChild(btn);
   });
+  // scroll ให้ choices ที่เพิ่งขึ้นมาอยู่ในสายตา
+  const scroller = document.getElementById("chatScroll");
+  if (scroller) scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
 }
 
 function clearChoices() {
@@ -362,38 +368,59 @@ function showResult() {
   const closing = shopkeeperClosings[Math.floor(Math.random() * shopkeeperClosings.length)];
   document.getElementById("resultNpcLine").textContent = closing;
 
-  // ผูก share
+  // ผูกปุ่มบันทึกภาพ
   const shareBtn = document.getElementById("btnShare");
-  shareBtn.onclick = () => shareResult(type, char);
+  shareBtn.onclick = () => saveResultImage(char);
   shareBtn.classList.remove("copied");
-  shareBtn.textContent = "📋 แชร์ให้เพื่อน";
+  shareBtn.textContent = "📸 บันทึกภาพ";
 
   showScene("scene-result");
 }
 
-async function shareResult(type, char) {
-  const url = location.origin + location.pathname;
-  const text = `ฉันเจอเพื่อนที่ร้านสัตว์เลี้ยงลึกลับ! 🐾\n${char.name}\n\nมาลองดูของเธอบ้าง 👉`;
-  const shareData = { title: "ร้านสัตว์เลี้ยงลึกลับ", text, url };
-
-  // ถ้ามี Web Share API (มือถือส่วนใหญ่)
-  if (navigator.share) {
-    try { await navigator.share(shareData); return; }
-    catch (e) { /* user cancelled หรือ unsupported → fallback copy */ }
+async function saveResultImage(char) {
+  const btn = document.getElementById("btnShare");
+  const target = document.querySelector(".result-content");
+  const actions = document.querySelector(".result-actions");
+  if (!target || typeof html2canvas === "undefined") {
+    alert("บันทึกภาพไม่ได้ ลองรีโหลดแล้วลองอีกครั้งนะ");
+    return;
   }
 
-  // fallback: copy ลิงก์
+  // เปลี่ยนสถานะปุ่ม + ซ่อนปุ่มตอน capture
+  const originalText = btn.textContent;
+  btn.textContent = "⏳ กำลังบันทึก...";
+  btn.disabled = true;
+  if (actions) actions.style.visibility = "hidden";
+
   try {
-    await navigator.clipboard.writeText(`${text}\n${url}`);
-    const btn = document.getElementById("btnShare");
-    btn.textContent = "✅ คัดลอกแล้ว!";
+    const canvas = await html2canvas(target, {
+      backgroundColor: getComputedStyle(document.body).backgroundColor || "#fff8ef",
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+
+    // ดาวน์โหลด
+    const link = document.createElement("a");
+    const safeName = (char.name || "result").replace(/[^\u0E00-\u0E7Fa-zA-Z0-9]/g, "_");
+    link.download = `pet-shop-${safeName}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    btn.textContent = "✅ บันทึกแล้ว!";
     btn.classList.add("copied");
     setTimeout(() => {
-      btn.textContent = "📋 แชร์ให้เพื่อน";
+      btn.textContent = originalText;
       btn.classList.remove("copied");
+      btn.disabled = false;
     }, 2000);
   } catch (e) {
-    alert("คัดลอกไม่ได้ ลองคัดลอก URL จาก address bar แทนนะ");
+    console.error(e);
+    alert("บันทึกภาพไม่ได้ ลองใหม่อีกครั้งนะ");
+    btn.textContent = originalText;
+    btn.disabled = false;
+  } finally {
+    if (actions) actions.style.visibility = "";
   }
 }
 
@@ -401,30 +428,36 @@ async function shareResult(type, char) {
    DEV SHORTCUTS (สำหรับเทส)
    ============================================
    URL params:
-     ?result=INTJ   → ข้ามไปหน้า result พร้อม type ที่กำหนด
-     ?result=random → สุ่ม type
-     ?skip=chat     → ข้าม intro ไปที่แชทเลย
-     ?skip=analysis → ข้าม warm-up ไปข้อคะแนนเลย
+     ?result=penguin-chess → ข้ามไปหน้า result (ใช้ slug ชื่อตัวละคร)
+     ?skip=chat            → ข้าม intro ไปที่แชทเลย
+     ?skip=analysis        → ข้าม warm-up ไปข้อคะแนนเลย
 
    Console (F12):
-     goResult("ENFP")   → กระโดดไปหน้า result
+     goResult("puppy-firework") → กระโดดไปหน้า result
      goChat()           → ไปแชทเลย
      goAnalysis()       → ไปข้อคะแนนเลย
 ============================================ */
 const TYPES = Object.keys(characters);
 
-function goResult(type) {
-  if (type === "random" || !type) {
-    type = TYPES[Math.floor(Math.random() * TYPES.length)];
+// หา type จาก slug (ชื่อตัวละคร)
+function resolveType(input) {
+  if (!input) return null;
+  const s = String(input).toLowerCase();
+  for (const [t, c] of Object.entries(characters)) {
+    if (c.slug && c.slug.toLowerCase() === s) return t;
   }
-  type = type.toUpperCase();
-  if (!characters[type]) {
-    console.warn(`ไม่มี type "${type}" — ใช้ ISTJ แทน`);
-    type = "ISTJ";
+  return null;
+}
+
+function goResult(input) {
+  const type = resolveType(input);
+  if (!type) {
+    console.warn(`ไม่มี "${input}" — ใช้ turtle-library แทน`);
   }
+  const finalType = type || "ISTJ";
   // hack คะแนนให้ออกเป็น type ที่ต้องการ
   state.scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
-  for (const ch of type) state.scores[ch] = 10;
+  for (const ch of finalType) state.scores[ch] = 10;
   showResult();
 }
 
