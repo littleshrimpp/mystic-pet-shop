@@ -89,6 +89,12 @@ function renderStory() {
     steam.classList.remove("active");
   }
 
+  // โชว์รูปเจ้าของร้านเฉพาะฉากสุดท้าย (ตอนทักทายหน้าร้าน)
+  const avatar = document.getElementById("storyAvatar");
+  if (avatar) {
+    avatar.classList.toggle("show", state.storyIndex === 5);
+  }
+
   renderDots();
   typeWriter(textEl, scene.text);
 }
@@ -377,30 +383,63 @@ function showResult() {
   showScene("scene-result");
 }
 
+function populateExportCard(char) {
+  document.getElementById("exportImage").src = char.image;
+  document.getElementById("exportImage").alt = char.name;
+  document.getElementById("exportName").textContent = char.name;
+  document.getElementById("exportTagline").textContent = char.tagline || "";
+  document.getElementById("exportPetIs").textContent = char.petIs || "";
+  document.getElementById("exportYouAre").textContent = char.youAre || "";
+  document.getElementById("exportGentle").textContent = char.gentle || "";
+
+  document.getElementById("exportTraits").innerHTML = (char.traits || [])
+    .map(t => `<span>${t}</span>`).join("");
+
+  document.getElementById("exportCompatible").innerHTML = (char.compatible || [])
+    .map(t => {
+      const c = characters[t];
+      if (!c) return "";
+      return `
+        <div class="export-compat-card">
+          <img src="${c.image}" alt="${c.name}"/>
+          <div class="export-compat-name">${c.name}</div>
+        </div>`;
+    }).join("");
+}
+
 async function saveResultImage(char) {
   const btn = document.getElementById("btnShare");
-  const target = document.querySelector(".result-content");
-  const actions = document.querySelector(".result-actions");
+  const target = document.getElementById("exportCard");
   if (!target || typeof html2canvas === "undefined") {
     alert("บันทึกภาพไม่ได้ ลองรีโหลดแล้วลองอีกครั้งนะ");
     return;
   }
 
-  // เปลี่ยนสถานะปุ่ม + ซ่อนปุ่มตอน capture
   const originalText = btn.textContent;
   btn.textContent = "⏳ กำลังบันทึก...";
   btn.disabled = true;
-  if (actions) actions.style.visibility = "hidden";
+
+  // เติมข้อมูลลง export card แล้วย้ายมาแสดง (off-screen z-index -1)
+  populateExportCard(char);
+  target.classList.add("capturing");
+
+  // รอให้รูปโหลดเสร็จก่อน capture
+  const img = document.getElementById("exportImage");
+  if (img && !img.complete) {
+    await new Promise(res => {
+      img.onload = img.onerror = res;
+    });
+  }
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
   try {
     const canvas = await html2canvas(target, {
-      backgroundColor: getComputedStyle(document.body).backgroundColor || "#fff8ef",
+      backgroundColor: "#fff5e3",
       scale: 2,
       useCORS: true,
       logging: false
     });
 
-    // ดาวน์โหลด
     const link = document.createElement("a");
     const safeName = (char.name || "result").replace(/[^\u0E00-\u0E7Fa-zA-Z0-9]/g, "_");
     link.download = `pet-shop-${safeName}.png`;
@@ -420,7 +459,7 @@ async function saveResultImage(char) {
     btn.textContent = originalText;
     btn.disabled = false;
   } finally {
-    if (actions) actions.style.visibility = "";
+    target.classList.remove("capturing");
   }
 }
 
