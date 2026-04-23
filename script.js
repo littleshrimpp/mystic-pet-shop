@@ -467,11 +467,37 @@ async function saveResultImage(char) {
       logging: false
     });
 
-    const link = document.createElement("a");
     const safeName = (char.name || "result").replace(/[^\u0E00-\u0E7Fa-zA-Z0-9]/g, "_");
-    link.download = `pet-shop-${safeName}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    const fileName = `pet-shop-${safeName}.png`;
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // แปลงเป็น blob เพื่อลองใช้ Web Share API (ใช้ได้ใน LINE/IG ส่วนใหญ่)
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
+
+    let shared = false;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: "เพื่อนที่รอเจอเราอยู่..." });
+        shared = true;
+      } catch (e) {
+        // user cancelled หรือ share ล้มเหลว → ไป fallback
+        if (e && e.name === "AbortError") shared = true; // user cancelled เอง
+      }
+    }
+
+    if (!shared) {
+      // Fallback: ลอง download link ก่อน (browser ปกติ), ไม่ได้ค่อย modal
+      const isInApp = /Line|FBAN|FBAV|Instagram|FB_IAB/i.test(navigator.userAgent);
+      if (!isInApp) {
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = dataUrl;
+        link.click();
+      } else {
+        showImagePreview(dataUrl);
+      }
+    }
 
     btn.textContent = "✅ บันทึกแล้ว!";
     btn.classList.add("copied");
@@ -488,6 +514,28 @@ async function saveResultImage(char) {
   } finally {
     target.classList.remove("capturing");
   }
+}
+
+/* Modal โชว์ภาพให้กดค้างบันทึก (สำหรับ LINE/IG WebView ที่บล็อก download) */
+function showImagePreview(dataUrl) {
+  let modal = document.getElementById("imgPreviewModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "imgPreviewModal";
+    modal.innerHTML = `
+      <div class="img-preview-backdrop"></div>
+      <div class="img-preview-box">
+        <p class="img-preview-hint">กดค้างที่ภาพ แล้วเลือก <b>"บันทึกภาพ"</b></p>
+        <img class="img-preview-img" alt="ผลลัพธ์"/>
+        <p class="img-preview-sub">ถ้าบันทึกไม่ได้ ลองเปิดในเบราว์เซอร์ Safari / Chrome แทนนะ</p>
+        <button class="img-preview-close">ปิด</button>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector(".img-preview-close").onclick = () => modal.classList.remove("show");
+    modal.querySelector(".img-preview-backdrop").onclick = () => modal.classList.remove("show");
+  }
+  modal.querySelector(".img-preview-img").src = dataUrl;
+  modal.classList.add("show");
 }
 
 /* ============================================

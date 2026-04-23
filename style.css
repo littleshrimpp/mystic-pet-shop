@@ -983,3 +983,72 @@ body.chat-mode {
   .result-image-wrap { width: 220px; height: 220px; }
   .result-name      { font-size: 24px; }
 }
+
+/* ============================================
+   IMAGE PREVIEW MODAL (LINE/IG fallback)
+   ============================================ */
+#imgPreviewModal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#imgPreviewModal.show { display: flex; }
+.img-preview-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+}
+.img-preview-box {
+  position: relative;
+  max-width: 420px; width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff5e3;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.img-preview-hint {
+  color: #3d2510; font-size: 15px; font-weight: 600;
+  margin-bottom: 14px;
+}
+.img-preview-hint b { color: #c06a1a; }
+.img-preview-img {
+  width: 100%; height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  -webkit-touch-callout: default;
+  user-select: auto;
+  pointer-events: auto;
+}
+.img-preview-sub {
+  color: #8a6a40; font-size: 12px;
+  margin-top: 12px; line-height: 1.5;
+}
+.img-preview-close {
+  margin-top: 14px;
+  padding: 10px 28px;
+  background: #c06a1a; color: #fff;
+  border: none; border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* ============================================
+   IMAGE PREVIEW MODAL (LINE/IG fallback)
+   ============================================ */
+#imgPreviewModal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#imgPreviewModal.show { display: flex; }
+.img-preview-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+}
+.img-preview-box {
+  position: relative;
+  max-width: 420px; width: 100
