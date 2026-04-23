@@ -108,17 +108,16 @@ body.chat-mode {
 .story-avatar {
   width: 0;
   height: 0;
-  border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   opacity: 0;
   transform: scale(0.6);
   margin-bottom: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,245,220,0.2);
+  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.35));
   transition: opacity 0.8s ease, transform 0.8s ease, width 0.6s ease, height 0.6s ease, margin-bottom 0.6s ease;
 }
 .story-avatar.show {
-  width: 140px;
-  height: 140px;
+  width: 180px;
+  height: 180px;
   opacity: 1;
   transform: scale(1);
   margin-bottom: 20px;
@@ -959,7 +958,11 @@ body.chat-mode {
 @media (max-width: 520px) {
   .scene { padding: 12px; }
   /* chat scene เต็มจอพอดี ไม่ให้ container + padding ล้น viewport */
-  #scene-chat.scene { padding: 0; }
+  #scene-chat.scene {
+    padding: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
   .chat-container {
     height: 100vh;
     height: 100dvh;
@@ -975,7 +978,7 @@ body.chat-mode {
 
   .story-content h1 { font-size: 24px; }
   .story-content p  { font-size: 16px; min-height: 110px; padding-top: 0.8em; }
-  .story-avatar.show { width: 110px; height: 110px; margin-bottom: 14px; }
+  .story-avatar.show { width: 140px; height: 140px; margin-bottom: 14px; }
   .result-image     { width: 200px; height: 200px; }
   .result-image-wrap { width: 220px; height: 220px; }
   .result-name      { font-size: 24px; }

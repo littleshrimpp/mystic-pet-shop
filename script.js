@@ -118,7 +118,7 @@ function renderStory() {
 }
 
 document.getElementById("storyBack").addEventListener("click", () => {
-  location.href = "index.html";
+  location.href = "../";
 });
 
 document.getElementById("storyNext").addEventListener("click", () => {
@@ -530,11 +530,14 @@ window.goResult = goResult;
 window.goChat = goChat;
 window.goAnalysis = goAnalysis;
 
-// อ่าน URL param ตอนโหลดหน้า
+// อ่าน URL param ตอนโหลดหน้า แล้ว clean URL ทิ้งทันที (ไม่เอา ?result=… โผล่)
 (function handleDevParams() {
   const p = new URLSearchParams(location.search);
   const result = p.get("result");
   const skip = p.get("skip");
+  if (result || skip) {
+    history.replaceState(null, "", location.pathname);
+  }
   if (result) {
     setTimeout(() => goResult(result), 50);
   } else if (skip === "chat") {
