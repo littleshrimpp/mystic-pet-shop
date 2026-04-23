@@ -104,20 +104,18 @@ html, body {
 
 /* ===== Avatar ===== */
 .hero-avatar {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 24px;
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.5),
-    0 0 0 4px rgba(255,220,160,0.25),
-    0 0 60px rgba(255,180,100,0.3);
-  animation: float 3.6s ease-in-out infinite;
+  display: block;
+  width: 200px;
+  height: auto;
+  margin: 0 auto 16px;
+  filter:
+    drop-shadow(0 12px 32px rgba(0,0,0,0.5))
+    drop-shadow(0 0 40px rgba(255,180,100,0.35));
+  animation: float 4.2s ease-in-out infinite;
 }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+  50%      { transform: translateY(-4px); }
 }
 
 /* ===== Title & text ===== */
@@ -224,7 +222,7 @@ html, body {
 /* ===== Mobile ===== */
 @media (max-width: 520px) {
   .landing { padding: 32px 16px; }
-  .hero-avatar { width: 130px; height: 130px; margin-bottom: 20px; }
+  .hero-avatar { width: 160px; height: auto; margin-bottom: 14px; }
   .landing-title { font-size: 28px; }
   .landing-sub { font-size: 14px; margin-bottom: 24px; }
   .landing-story { font-size: 14px; line-height: 1.9; margin-bottom: 28px; }
