@@ -73,6 +73,38 @@ body.chat-mode {
   align-items: center;
   justify-content: center;
 }
+/* หน้าร้าน SVG — ปกติซ่อน พอถึง intro 4 ค่อย fade-in */
+.shop-illustration {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transform: scale(0.85) translateY(10px);
+  margin-bottom: 0;
+  overflow: visible;
+  transition: opacity 0.9s ease, transform 0.9s ease, width 0.5s ease, height 0.5s ease, margin-bottom 0.5s ease;
+  filter: drop-shadow(0 12px 40px rgba(255,180,100,0.25));
+}
+.shop-illustration.show {
+  width: 260px;
+  height: 240px;
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  margin-bottom: 18px;
+  animation: shopSway 6s ease-in-out infinite;
+}
+.shop-illustration svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+@keyframes shopSway {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@media (max-width: 520px) {
+  .shop-illustration.show { width: 210px; height: 200px; margin-bottom: 12px; }
+}
+
 .story-avatar {
   width: 0;
   height: 0;
@@ -238,6 +270,47 @@ body.chat-mode {
   background: rgba(255,255,255,0.95);
   color: var(--text);
   backdrop-filter: blur(6px);
+}
+
+.story-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+.btn-back {
+  padding: 14px 32px;
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.btn-back:active {
+  transform: translateY(1px) scale(0.96);
+  transition: all 0.08s ease;
+}
+.btn-back[hidden] { display: none; }
+
+@media (max-width: 520px) {
+  .story-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .story-actions .btn-next,
+  .story-actions .btn-back {
+    width: 100%;
+    max-width: 280px;
+  }
 }
 
 /* ============================================

@@ -4,148 +4,42 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ร้านสัตว์เลี้ยงลึกลับ 🐾</title>
-  <meta name="description" content="ค้นหาสัตว์เลี้ยงที่เกิดมาเพื่อเจ้า"/>
+  <meta name="description" content="มีเพื่อนตัวนึงรอเจอเราอยู่"/>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png"/>
   <link rel="apple-touch-icon" href="assets/favicon.png"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="landing.css"/>
 </head>
 <body>
 
-  <!-- ===== SCENE 1: STORY INTRO ===== -->
-  <section id="scene-intro" class="scene active mood-1">
-    <div class="rain" id="rain"></div>
-    <div class="steam" id="steam">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="vignette"></div>
-    <div class="story-content">
-      <img class="story-avatar" id="storyAvatar" src="assets/characters/shopkeeper.webp" alt="เจ้าของร้าน"/>
-      <p class="story-text" id="storyText"></p>
-      <button class="btn-next" id="storyNext">ต่อไป →</button>
-      <div class="story-dots" id="storyDots"></div>
-    </div>
-  </section>
+  <div class="rain" id="rain"></div>
+  <div class="vignette"></div>
 
-  <!-- ===== SCENE 2: CHAT (warm-up + questions) ===== -->
-  <section id="scene-chat" class="scene">
-    <div class="chat-container">
-      <div class="chat-header">
-        <img class="npc-avatar" src="assets/characters/shopkeeper.webp" alt="เจ้าของร้าน"/>
-        <span class="npc-name">เจ้าของร้าน</span>
-      </div>
-      <div class="chat-scroll" id="chatScroll">
-        <div class="chat-messages" id="chatMessages">
-          <!-- messages injected by JS -->
-        </div>
-        <div class="chat-choices" id="chatChoices">
-          <!-- choice buttons injected by JS -->
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== SCENE 3: RESULT ===== -->
-  <section id="scene-result" class="scene">
-    <div class="result-sparkles" aria-hidden="true">
-      <span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span>
-    </div>
-
-    <div class="result-content">
-      <div class="result-left">
-        <p class="result-intro">เพื่อนที่รอเจอเราอยู่...</p>
-
-        <div class="result-image-wrap">
-          <div class="result-spotlight"></div>
-          <img class="result-image" id="resultImage" src="" alt="Result"/>
-        </div>
-
-        <h2 class="result-name" id="resultName"></h2>
-        <p class="result-tagline" id="resultTagline"></p>
-
-        <div class="result-traits" id="resultTraits"></div>
-
-        <div class="result-section result-compatible-section">
-          <h3>✨ เพื่อนที่จองเราด้วย</h3>
-          <p class="result-subhint">นอกจากเพื่อนหลักแล้ว ยังมีอีกหลายคนที่เข้ากับเราได้</p>
-          <div class="compatible-list" id="resultCompatible"></div>
-        </div>
+  <main class="landing">
+    <div class="landing-inner">
+      <div class="shop-sign">
+        <span class="sign-text">ร้านสัตว์เลี้ยง</span>
       </div>
 
-      <div class="result-right">
-        <div class="result-section">
-          <h3>🐾 เจ้าหนูนี้เป็นยังไง?</h3>
-          <p class="result-text" id="resultPetIs"></p>
-        </div>
+      <img class="hero-avatar" src="assets/characters/shopkeeper.webp" alt="เจ้าของร้าน"/>
 
-        <div class="result-section">
-          <h3>🫧 แล้วเราล่ะ?</h3>
-          <p class="result-text" id="resultYouAre"></p>
-        </div>
+      <h1 class="landing-title">ร้านสัตว์เลี้ยงลึกลับ</h1>
+      <p class="landing-sub">ค่ำคืนที่มีใครบางตัวกำลังรอเราอยู่</p>
 
-        <div class="result-section result-gentle-section">
-          <h3>💭 อยากกระซิบเบาๆ</h3>
-          <p class="result-text" id="resultGentle"></p>
-        </div>
+      <p class="landing-story">
+        ค่ำคืนนี้... ฝนเริ่มตกปรอยๆ<br/>
+        ระหว่างทางกลับบ้าน<br/>
+        <i>มีซอยเล็กๆ ที่ไม่เคยเห็นมาก่อน...</i>
+      </p>
 
-        <div class="result-shopkeeper">
-          <img src="assets/characters/shopkeeper.webp" alt="เจ้าของร้าน"/>
-          <div class="bubble" id="resultNpcLine"></div>
-        </div>
+      <a class="btn-enter" href="chat.html">
+        <span>เริ่มค่ำคืนนี้</span>
+      </a>
 
-        <!-- เก็บไว้ใช้ภายหลัง (ตอนนี้ hide) -->
-        <p class="result-description" id="resultDescription" style="display:none"></p>
-
-        <div class="result-actions">
-        <button class="btn-share" id="btnShare">📸 บันทึกภาพ</button>
-        <button class="btn-restart" onclick="location.reload()">ทำอีกครั้ง</button>
-      </div>
+      <p class="landing-hint">ใช้เวลาประมาณ 3-5 นาที</p>
+      <p class="landing-privacy">เราไม่เก็บข้อมูลส่วนตัวของคุณ ทุกอย่างอยู่แค่ในเครื่องคุณเท่านั้น</p>
     </div>
-  </section>
+  </main>
 
-  <!-- ===== WHITE FLASH OVERLAY ===== -->
-  <div class="flash" id="flash"></div>
-
-  <!-- ===== EXPORT CARD (hidden, ใช้ถ่ายภาพอย่างเดียว) ===== -->
-  <div class="export-card" id="exportCard" aria-hidden="true">
-    <div class="export-header">
-      <p class="export-intro">เพื่อนที่รอเจอเราอยู่...</p>
-      <div class="export-image-wrap">
-        <img class="export-image" id="exportImage" src="" alt=""/>
-      </div>
-      <h2 class="export-name" id="exportName"></h2>
-      <p class="export-tagline" id="exportTagline"></p>
-      <div class="export-traits" id="exportTraits"></div>
-    </div>
-
-    <div class="export-section">
-      <h3>🐾 เจ้าหนูนี้เป็นยังไง?</h3>
-      <p class="export-text" id="exportPetIs"></p>
-    </div>
-
-    <div class="export-section">
-      <h3>🫧 แล้วเราล่ะ?</h3>
-      <p class="export-text" id="exportYouAre"></p>
-    </div>
-
-    <div class="export-section export-gentle">
-      <h3>💭 อยากกระซิบเบาๆ</h3>
-      <p class="export-text" id="exportGentle"></p>
-    </div>
-
-    <div class="export-section export-compat">
-      <h3>✨ เพื่อนที่จองเราด้วย</h3>
-      <div class="export-compat-list" id="exportCompatible"></div>
-    </div>
-
-    <div class="export-footer">
-      <span>🐾 ร้านสัตว์เลี้ยงลึกลับ</span>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>

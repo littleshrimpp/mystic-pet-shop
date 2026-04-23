@@ -95,9 +95,31 @@ function renderStory() {
     avatar.classList.toggle("show", state.storyIndex === 5);
   }
 
+  // โชว์ SVG หน้าร้านตอนเจอป้าย (intro 4, index 3)
+  const shopIllu = document.getElementById("shopIllustration");
+  if (shopIllu) {
+    shopIllu.classList.toggle("show", state.storyIndex === 3);
+  }
+
+  // อัปเดต label ปุ่มตามสถานการณ์
+  const nextBtn = document.getElementById("storyNext");
+  if (nextBtn) {
+    nextBtn.textContent = scene.cta || "ต่อไป";
+  }
+
+  // ปุ่ม "เดินกลับ" โชว์เฉพาะฉากที่เจอป้ายร้าน (index 3) — decision point
+  const backBtn = document.getElementById("storyBack");
+  if (backBtn) {
+    backBtn.hidden = state.storyIndex !== 3;
+  }
+
   renderDots();
   typeWriter(textEl, scene.text);
 }
+
+document.getElementById("storyBack").addEventListener("click", () => {
+  location.href = "index.html";
+});
 
 document.getElementById("storyNext").addEventListener("click", () => {
   // กดขณะพิมพ์ = ข้ามไป show เต็มเลย
