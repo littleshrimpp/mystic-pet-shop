@@ -118,7 +118,8 @@ function renderStory() {
 }
 
 document.getElementById("storyBack").addEventListener("click", () => {
-  location.href = "../";
+  // relative URL จะ resolve เทียบ <base href="../"> → "./" = landing page
+  location.href = "./";
 });
 
 document.getElementById("storyNext").addEventListener("click", () => {
