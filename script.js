@@ -328,8 +328,13 @@ async function askAnalysisQuestion() {
     addUserMessage(choice.text);
     clearChoices();
     addScore(choice.axis, choice.score);
+    await sleep(500);
+    // ให้เจ้าของร้านตอบรับก่อน ไม่ยิงข้อต่อไปเลย
+    if (choice.response && choice.response.length) {
+      await npcSpeak(choice.response);
+    }
     state.analysisIndex++;
-    await sleep(600);
+    await sleep(700);
     await askAnalysisQuestion();
   });
 }
