@@ -1026,13 +1026,22 @@ body.chat-mode {
   color: #8a6a40; font-size: 12px;
   margin-top: 12px; line-height: 1.5;
 }
+.img-preview-external,
 .img-preview-close {
-  margin-top: 14px;
-  padding: 10px 28px;
-  background: #c06a1a; color: #fff;
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 22px;
   border: none; border-radius: 999px;
   font-size: 14px; font-weight: 600;
   cursor: pointer;
+}
+.img-preview-external {
+  background: #c06a1a; color: #fff;
+  margin-right: 8px;
+}
+.img-preview-close {
+  background: transparent; color: #8a6a40;
+  border: 1px solid #d4b890;
 }
 
 /* ============================================

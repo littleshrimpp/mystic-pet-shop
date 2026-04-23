@@ -450,13 +450,9 @@ async function saveResultImage(char) {
   populateExportCard(char);
   target.classList.add("capturing");
 
-  // รอให้รูปโหลดเสร็จก่อน capture
-  const img = document.getElementById("exportImage");
-  if (img && !img.complete) {
-    await new Promise(res => {
-      img.onload = img.onerror = res;
-    });
-  }
+  // รอทุกรูปในการ์ดให้โหลดก่อน แล้วแปลง WebP → PNG data URL
+  // (Safari/iPad ใน html2canvas เรนเดอร์ WebP ออกมาเป็นกล่องขาวบ่อย)
+  await inlineImagesAsPng(target);
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
   try {
@@ -471,32 +467,38 @@ async function saveResultImage(char) {
     const fileName = `pet-shop-${safeName}.png`;
     const dataUrl = canvas.toDataURL("image/png");
 
-    // แปลงเป็น blob เพื่อลองใช้ Web Share API (ใช้ได้ใน LINE/IG ส่วนใหญ่)
-    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
+    const ua = navigator.userAgent || "";
+    const isInApp = /Line|FBAN|FBAV|Instagram|FB_IAB|FBIOS/i.test(ua);
 
-    let shared = false;
-    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: "เพื่อนที่รอเจอเราอยู่..." });
-        shared = true;
-      } catch (e) {
-        // user cancelled หรือ share ล้มเหลว → ไป fallback
-        if (e && e.name === "AbortError") shared = true; // user cancelled เอง
+    let handled = false;
+
+    // ใน IG/LINE/FB in-app WebView → ข้าม share API (มันจะเด้ง "Page can't be loaded")
+    // ไปโชว์ modal ให้กดค้างบันทึกเลย
+    if (isInApp) {
+      showImagePreview(dataUrl);
+      handled = true;
+    }
+
+    // Browser ปกติ → ลอง Web Share API ก่อน (native share sheet บนมือถือ)
+    if (!handled) {
+      const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+      const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: "เพื่อนที่รอเจอเราอยู่..." });
+          handled = true;
+        } catch (e) {
+          if (e && e.name === "AbortError") handled = true;
+        }
       }
     }
 
-    if (!shared) {
-      // Fallback: ลอง download link ก่อน (browser ปกติ), ไม่ได้ค่อย modal
-      const isInApp = /Line|FBAN|FBAV|Instagram|FB_IAB/i.test(navigator.userAgent);
-      if (!isInApp) {
-        const link = document.createElement("a");
-        link.download = fileName;
-        link.href = dataUrl;
-        link.click();
-      } else {
-        showImagePreview(dataUrl);
-      }
+    // Desktop / browser ที่ไม่มี share → download link
+    if (!handled) {
+      const link = document.createElement("a");
+      link.download = fileName;
+      link.href = dataUrl;
+      link.click();
     }
 
     btn.textContent = "✅ บันทึกแล้ว!";
@@ -516,6 +518,48 @@ async function saveResultImage(char) {
   }
 }
 
+/* แปลงภาพใน container ทุกรูปเป็น PNG data URL
+   (แก้บั๊ก html2canvas + WebP + Safari ที่เรนเดอร์เป็นกล่องขาว) */
+const _imgCache = new Map();
+async function inlineImagesAsPng(container) {
+  const imgs = Array.from(container.querySelectorAll("img"));
+  await Promise.all(imgs.map(async (imgEl) => {
+    const src = imgEl.getAttribute("src");
+    if (!src || src.startsWith("data:")) return;
+    try {
+      if (!_imgCache.has(src)) {
+        _imgCache.set(src, await urlToPngDataUrl(src));
+      }
+      imgEl.src = _imgCache.get(src);
+      // รอให้ภาพใหม่โหลดก่อน
+      if (!imgEl.complete) {
+        await new Promise(res => { imgEl.onload = imgEl.onerror = res; });
+      }
+    } catch (e) {
+      console.warn("inline image failed:", src, e);
+    }
+  }));
+}
+
+function urlToPngDataUrl(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      try {
+        resolve(canvas.toDataURL("image/png"));
+      } catch (e) { reject(e); }
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
 /* Modal โชว์ภาพให้กดค้างบันทึก (สำหรับ LINE/IG WebView ที่บล็อก download) */
 function showImagePreview(dataUrl) {
   let modal = document.getElementById("imgPreviewModal");
@@ -527,12 +571,31 @@ function showImagePreview(dataUrl) {
       <div class="img-preview-box">
         <p class="img-preview-hint">กดค้างที่ภาพ แล้วเลือก <b>"บันทึกภาพ"</b></p>
         <img class="img-preview-img" alt="ผลลัพธ์"/>
-        <p class="img-preview-sub">ถ้าบันทึกไม่ได้ ลองเปิดในเบราว์เซอร์ Safari / Chrome แทนนะ</p>
+        <p class="img-preview-sub">ถ้าบันทึกไม่ได้ ให้แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์</p>
+        <button class="img-preview-external">เปิดในเบราว์เซอร์</button>
         <button class="img-preview-close">ปิด</button>
       </div>`;
     document.body.appendChild(modal);
     modal.querySelector(".img-preview-close").onclick = () => modal.classList.remove("show");
     modal.querySelector(".img-preview-backdrop").onclick = () => modal.classList.remove("show");
+    modal.querySelector(".img-preview-external").onclick = () => {
+      // พยายามเปิดใน external browser
+      const url = location.href;
+      const ua = navigator.userAgent || "";
+      if (/Android/i.test(ua)) {
+        // Chrome intent บน Android
+        location.href = "intent://" + url.replace(/^https?:\/\//, "") +
+          "#Intent;scheme=https;package=com.android.chrome;end";
+      } else {
+        // iOS: copy link + แจ้งให้ paste ใน Safari
+        try {
+          navigator.clipboard.writeText(url);
+          alert("คัดลอกลิงก์แล้ว\nกรุณาเปิด Safari แล้ววาง (paste) เพื่อเปิดอีกครั้ง");
+        } catch (e) {
+          alert("กรุณาก็อปลิงก์นี้ไปเปิดใน Safari:\n" + url);
+        }
+      }
+    };
   }
   modal.querySelector(".img-preview-img").src = dataUrl;
   modal.classList.add("show");
