@@ -455,49 +455,50 @@ async function saveResultImage(char) {
   await inlineImagesAsPng(target);
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
+  const ua = navigator.userAgent || "";
+  const isInApp = /Line|FBAN|FBAV|Instagram|FB_IAB|FBIOS/i.test(ua);
+
   try {
+    // ใน in-app WebView ลด scale ให้ output เล็กลง (IG render dataURL ใหญ่ไม่ไหว)
     const canvas = await html2canvas(target, {
       backgroundColor: "#fff5e3",
-      scale: 2,
+      scale: isInApp ? 1 : 2,
       useCORS: true,
       logging: false
     });
 
     const safeName = (char.name || "result").replace(/[^\u0E00-\u0E7Fa-zA-Z0-9]/g, "_");
     const fileName = `pet-shop-${safeName}.png`;
-    const dataUrl = canvas.toDataURL("image/png");
 
-    const ua = navigator.userAgent || "";
-    const isInApp = /Line|FBAN|FBAV|Instagram|FB_IAB|FBIOS/i.test(ua);
+    // แปลง canvas → blob (blob URL ใช้หน่วยความจำน้อยกว่า data URL — WebView ชอบ)
+    const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+    const blobUrl = blob ? URL.createObjectURL(blob) : null;
+    const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
 
     let handled = false;
 
-    // ใน IG/LINE/FB in-app WebView → ข้าม share API (มันจะเด้ง "Page can't be loaded")
-    // ไปโชว์ modal ให้กดค้างบันทึกเลย
+    // ใน IG/LINE/FB in-app WebView → ข้าม share API ไปโชว์ modal
     if (isInApp) {
-      showImagePreview(dataUrl);
+      if (blobUrl) showImagePreview(blobUrl);
+      else showImagePreview(canvas.toDataURL("image/png"));
       handled = true;
     }
 
-    // Browser ปกติ → ลอง Web Share API ก่อน (native share sheet บนมือถือ)
-    if (!handled) {
-      const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-      const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
-      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: "เพื่อนที่รอเจอเราอยู่..." });
-          handled = true;
-        } catch (e) {
-          if (e && e.name === "AbortError") handled = true;
-        }
+    // Browser ปกติ → ลอง Web Share API ก่อน
+    if (!handled && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: "เพื่อนที่รอเจอเราอยู่..." });
+        handled = true;
+      } catch (e) {
+        if (e && e.name === "AbortError") handled = true;
       }
     }
 
-    // Desktop / browser ที่ไม่มี share → download link
+    // Desktop / fallback → download link
     if (!handled) {
       const link = document.createElement("a");
       link.download = fileName;
-      link.href = dataUrl;
+      link.href = blobUrl || canvas.toDataURL("image/png");
       link.click();
     }
 
@@ -541,23 +542,49 @@ async function inlineImagesAsPng(container) {
   }));
 }
 
-function urlToPngDataUrl(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      try {
-        resolve(canvas.toDataURL("image/png"));
-      } catch (e) { reject(e); }
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
+async function urlToPngDataUrl(url) {
+  // ลอง fetch → blob → dataURL ก่อน (reliable สุดใน IG WebView)
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const rawDataUrl = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(blob);
+    });
+    // แปลง WebP dataURL → PNG dataURL ผ่าน canvas
+    return await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          resolve(canvas.toDataURL("image/png"));
+        } catch (e) { reject(e); }
+      };
+      img.onerror = reject;
+      img.src = rawDataUrl;
+    });
+  } catch (e) {
+    // fallback: โหลดภาพตรงๆ (same-origin, ไม่ใส่ crossOrigin)
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          resolve(canvas.toDataURL("image/png"));
+        } catch (err) { reject(err); }
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
 }
 
 /* Modal โชว์ภาพให้กดค้างบันทึก (สำหรับ LINE/IG WebView ที่บล็อก download) */
