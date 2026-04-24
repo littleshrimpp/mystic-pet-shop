@@ -70,10 +70,10 @@ function openModal(mbti) {
       <p class="modal-text">${char.petIs}</p>
     </div>` : ""}
 
-    ${char.youAre ? `
+    ${char.waiting ? `
     <div class="modal-section">
       <div class="modal-section-title">คนที่น้องกำลังรอ</div>
-      <p class="modal-text">${char.youAre}</p>
+      <p class="modal-text">${char.waiting}</p>
     </div>` : ""}
 
     ${traitsHtml ? `
@@ -82,10 +82,10 @@ function openModal(mbti) {
       <div class="modal-traits">${traitsHtml}</div>
     </div>` : ""}
 
-    ${char.gentle ? `
+    ${char.quirk ? `
     <div class="modal-section">
-      <div class="modal-section-title">โน้ตเล็กๆ จากเจ้าของร้าน</div>
-      <div class="modal-gentle">${char.gentle}</div>
+      <div class="modal-section-title">นิสัยเล็กๆ น้อยๆ ของน้อง</div>
+      <div class="modal-gentle">${char.quirk}</div>
     </div>` : ""}
 
     ${compatHtml ? `

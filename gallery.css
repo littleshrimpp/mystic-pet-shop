@@ -372,7 +372,6 @@ html, body {
   text-align: center;
   line-height: 1.6;
   margin-bottom: 20px;
-  font-style: italic;
 }
 
 .modal-section {
@@ -432,7 +431,6 @@ html, body {
   font-size: 13.5px;
   line-height: 1.75;
   color: #5d3a1f;
-  font-style: italic;
 }
 
 /* ===== Responsive ===== */
