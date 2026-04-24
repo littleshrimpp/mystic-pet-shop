@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base href="../"/>
+  <title>รู้จักน้องๆ ทั้งหมด · ร้านสัตว์เลี้ยงลึกลับ</title>
+  <meta name="description" content="รู้จักน้องๆ ทั้ง 16 ตัวของร้านสัตว์เลี้ยงลึกลับ"/>
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png"/>
+  <link rel="apple-touch-icon" href="assets/favicon.png"/>
+  <link rel="stylesheet" href="gallery.css"/>
+</head>
+<body>
+
+  <div class="rain" id="rain"></div>
+  <div class="vignette"></div>
+
+  <header class="gallery-header">
+    <a class="gallery-back" href="./" aria-label="กลับหน้าหลัก">
+      <span aria-hidden="true">←</span> หน้าหลัก
+    </a>
+    <div class="gallery-header-text">
+      <div class="gallery-kicker">รู้จักน้องๆ ทุกตัว</div>
+      <h1 class="gallery-title">16 ตัวเล็กๆ ที่รอเจอใครสักคน</h1>
+      <p class="gallery-sub">ตัวไหนรอเราอยู่... ต้องเดินเข้าไปในร้านถึงจะรู้</p>
+    </div>
+  </header>
+
+  <main class="gallery">
+    <div class="gallery-grid" id="galleryGrid" aria-label="รายชื่อตัวละครทั้งหมด"></div>
+  </main>
+
+  <footer class="gallery-footer">
+    <p class="gallery-footer-text">ยังไม่รู้ว่าตัวไหนคือเรา?</p>
+    <a class="btn-enter" href="chat/">
+      <span>เริ่มค่ำคืนนี้</span>
+    </a>
+    <p class="gallery-footer-hint">ใช้เวลาประมาณ 3-5 นาที</p>
+  </footer>
+
+  <!-- Character Detail Modal -->
+  <div id="charModal" class="char-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="char-modal-backdrop" data-close></div>
+    <div class="char-modal-box" role="document">
+      <button class="char-modal-close" data-close aria-label="ปิด">×</button>
+      <div class="char-modal-body" id="charModalBody"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="gallery.js"></script>
+</body>
+</html>
